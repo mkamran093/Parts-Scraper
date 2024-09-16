@@ -3,7 +3,6 @@ from igc_scraper import IGCScraper
 from pwg_scraper import PWGScraper
 from pilkington_scraper import PilkingtonScraper
 from mygrant_scraper import MyGrantScraper
-import time
 import psutil
 import pandas as pd
 import logging
@@ -71,24 +70,39 @@ def main():
         kill_chrome_processes()
         driver = setup_chrome_driver()
 
+        search_type = st.radio("Search by:", ("Part Number", "Vehicle", "VIN"))
+
         with st.form(key='my_form'):
-            user_input = st.text_input(label='Enter part number')
+            if search_type == "Part Number":
+                search_value = st.text_input(label='Enter part number')
+            elif search_type == "Vehicle":
+                year = st.selectbox("Year", range(1990, 2024))
+                make = st.text_input("Make")
+                model = st.text_input("Model")
+                search_value = f"{year} {make} {model}"
+            else:  # VIN
+                search_value = st.text_input(label='Enter VIN number')
+            
             submit_button = st.form_submit_button(label='Search')
 
         if submit_button:
             with st.spinner("Fetching data..."):
                 scrapers = [
-                    (PWGScraper, "PWG", ["Part Name", "Description", "Availability", "Price", "Location"]),
                     (IGCScraper, "IGC", ["Part Number", "Part Name", "Price", "Location"]),
+                    (PWGScraper, "PWG", ["Part Name", "Description", "Availability", "Price", "Location"]),
                     (PilkingtonScraper, "Pilkington", ["Part Number", "Price", "In-Stock", "Location"]),
                     (MyGrantScraper, "MyGrant", ["Location", "Part Number", "Availability", "Price"])
                 ]
 
                 for scraper_func, name, headers in scrapers:
-                    data = run_scraper(scraper_func, user_input, driver, name)
-                    st.subheader(f"{name} Results")
-                    html = create_table_with_cart_button(data, headers)
-                    st.markdown(html, unsafe_allow_html=True)
+                    if name == "IGC" or search_type == "Part Number":
+                        data = run_scraper(scraper_func, search_type, search_value, driver, name)
+                        if data:
+                            st.subheader(f"{name} Results")
+                            html = create_table_with_cart_button(data, headers)
+                            st.markdown(html, unsafe_allow_html=True)
+                        else:
+                            st.warning(f"No results found for {name}")
 
     except Exception as e:
         logger.error(f"Unexpected error in main function: {e}")
