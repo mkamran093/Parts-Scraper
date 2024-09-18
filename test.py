@@ -3,8 +3,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+import undetected_chromedriver as uc
 
-def searchPart(driver, partNo, logger):
+def searchPart(driver, partNo):
 
     url = 'https://buypgwautoglass.com/PartSearch/search.asp?REG=&UserType=F&ShipToNo=85605&PB=544'
     try:
@@ -19,7 +20,7 @@ def searchPart(driver, partNo, logger):
 
         # Send keys to the input field
         part_no_input.send_keys(partNo + Keys.RETURN)
-        
+
         quote = wait.until(EC.presence_of_element_located((By.XPATH, "//button[@id='btnQuote']")))
         if (quote.text == "Quotes"):
             quote.click()
@@ -59,7 +60,6 @@ def searchPart(driver, partNo, logger):
         try:
             matching_table = driver.find_element(By.XPATH, "//table[.//td//span[contains(text(), 'Branch:: MIAMI FL')]]")
         except:
-            logger.info("Parts for Miami not found")
             return parts
 
         products = matching_table.find_elements(By.TAG_NAME, "tr")[2:]
@@ -82,19 +82,30 @@ def searchPart(driver, partNo, logger):
                     parts.append(part)
             except:
                 continue
-        return parts
-
+        print(parts)
     except TimeoutException:
-        logger.error("No results found for the part number: " + partNo + " on PWG.")
         return None
 
-def PWGScraper(partNo, driver, logger):
+def setup_chrome_driver():
+    try:
+        options = uc.ChromeOptions()
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument("--user-data-dir=C:\\Users\\NeXbit\\AppData\\Local\\Google\\Chrome\\User Data")
+        # options.add_argument("--headless")
+        options.add_argument("--disable-gpu")
+        driver = uc.Chrome(options=options)
+        return driver
+    except Exception as e:
+        raise
+
+def PWGScraper(partNo, driver):
 
     try:
-        result = searchPart(driver, partNo, logger)
+        result = searchPart(driver, partNo)
+        driver.quit()
         return result
     except:
         return None
 
 if __name__ == "__main__":
-    PWGScraper("DW01256")
+    PWGScraper("DW01256", setup_chrome_driver())
