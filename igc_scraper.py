@@ -4,6 +4,47 @@ from selenium.webdriver.support import expected_conditions as EC
 
 def IGCScraper(partNo, driver, logger):
 
+    # if search_type == "Vehicle Type":
+    #     parts = []
+    #     driver.get('https://importglasscorp.com/lookup')
+    #     wait = WebDriverWait(driver, 10)  # wait up to 10 seconds
+    #     try:
+    #         wait.until(EC.presence_of_element_located((By.ID, "make"))).send_keys(partNo["make"])
+    #     except:
+    #         logger.error("Make not found in IGC")
+    #         return None
+    #     try:
+    #         wait.until(EC.presence_of_element_located((By.ID, "model"))).send_keys(partNo["model"])
+    #     except:
+    #         logger.error("Model not found in IGC")
+    #         return None
+    #     try:
+    #         wait.until(EC.presence_of_element_located((By.ID, "data-year"))).click()
+    #     except:
+    #         logger.error("Year not found in IGC")
+    #         return None
+    #     try:
+    #         links = wait.until(EC.presence_of_element_located((By.ID, "bodystyle_choices"))).find_elements(By.TAG_NAME, "a")
+    #     except:
+    #         logger.error("Body style not found in IGC")
+    #         return None
+        
+    #     for link in links:
+    #         link.click()
+    #         all_items = wait.until(EC.presence_of_element_located((By.ID, "items")))
+    #         types = all_items.find_element(By.TAG_NAME, "h4").text
+    #         tables = all_items.find_elements(By.TAG_NAME, "table")
+    #         for type, table in zip(types.split("\n"), tables):
+    #             trs = tbody.find_elements(By.TAG_NAME, "tr")
+    #             for tr in trs:
+    #                 td_elements = tr.find_elements(By.TAG_NAME, 'td')
+    #                 partNo = td_elements[0].text
+    #                 description = td_elements[1].text
+    #                 parts.append([partNo, description, type])
+
+    #     print(parts)
+    #     return parts
+
     print("Searching part in IGC: " + partNo)   
     url = 'https://importglasscorp.com/glass/' + partNo
     try:

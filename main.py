@@ -51,9 +51,12 @@ def create_table_with_cart_button(data, headers):
         logger.error(f"Error creating table with cart button: {e}")
         return f"<p>Error creating table: {str(e)}</p>"
 
-def run_scraper(scraper_func, input_text, driver, scraper_name):
+def run_scraper(scraper_func, input_text, driver, scraper_name, search_option):
     try:
         logger.info(f"Starting {scraper_name} scraper")
+        # if (scraper_name == "igc"):
+        #     data = IGCScraper(input_text, driver, logger, search_option)
+        #     return data
         data = scraper_func(input_text, driver, logger)
         logger.info(f"{scraper_name} scraper completed successfully")
         return data
@@ -69,8 +72,22 @@ def main():
         kill_chrome_processes()
         driver = setup_chrome_driver()
 
-        with st.form(key='my_form'):
-            user_input = st.text_input(label='Enter part number')
+        search_option = st.radio(
+            "How would you like to search for the product?",
+            ("Part Number", "Vehicle Type", "VIN Number")
+        )
+
+        with st.form(key='search_form'):
+            if search_option == "Part Number":
+                user_input = st.text_input(label='Enter part number')
+            elif search_option == "Vehicle Type":
+                user_input = st.text_input(label='Enter vehicle make')
+                # model = st.text_input(label='Enter vehicle model')
+                # year = st.text_input(label='Enter vehicle year')
+                # user_input = [make, model, year]
+            else:  # VIN Number
+                user_input = st.text_input(label='Enter VIN number')
+            
             submit_button = st.form_submit_button(label='Search')
 
         if submit_button:
@@ -83,7 +100,7 @@ def main():
                 ]
 
                 for scraper_func, name, headers in scrapers:
-                    data = run_scraper(scraper_func, user_input, driver, name)
+                    data = run_scraper(scraper_func, user_input, driver, name, search_option)
                     st.subheader(f"{name} Results")
                     html = create_table_with_cart_button(data, headers)
                     st.markdown(html, unsafe_allow_html=True)

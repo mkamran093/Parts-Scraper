@@ -4,86 +4,89 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 import undetected_chromedriver as uc
+import logging
 
-def searchPart(driver, partNo):
+def IGCScraper(partNo, driver, search_type):
 
-    url = 'https://buypgwautoglass.com/PartSearch/search.asp?REG=&UserType=F&ShipToNo=85605&PB=544'
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+    if search_type == "Vehicle Type":
+        
+        pass
+    #     parts = []
+    #     driver.get('https://importglasscorp.com/lookup')
+    #     wait = WebDriverWait(driver, 10)  # wait up to 10 seconds
+    #     try:
+    #         wait.until(EC.presence_of_element_located((By.ID, "make"))).send_keys(partNo["make"] + Keys.RETURN)
+    #     except:
+    #         logger.error("Make not found in IGC")
+    #         return None
+    #     try:
+    #         wait.until(EC.presence_of_element_located((By.ID, "model"))).send_keys(partNo["model"] + Keys.RETURN)
+    #     except:
+    #         logger.error("Model not found in IGC")
+    #         return None
+    #     try:
+    #         wait.until(EC.presence_of_element_located((By.ID, "data-year"))).click()
+    #     except:
+    #         logger.error("Year not found in IGC")
+    #         return None
+    #     try:
+    #         links = wait.until(EC.presence_of_element_located((By.ID, "bodystyle_choices"))).find_elements(By.TAG_NAME, "a")
+    #     except:
+    #         logger.error("Body style not found in IGC")
+    #         return None
+        
+    #     for link in links:
+    #         link.click()
+    #         all_items = wait.until(EC.presence_of_element_located((By.ID, "items")))
+    #         types = all_items.find_element(By.TAG_NAME, "h4").text
+    #         tables = all_items.find_elements(By.TAG_NAME, "table")
+    #         for type, table in zip(types.split("\n"), tables):
+    #             trs = tbody.find_elements(By.TAG_NAME, "tr")
+    #             for tr in trs:
+    #                 td_elements = tr.find_elements(By.TAG_NAME, 'td')
+    #                 partNo = td_elements[0].text
+    #                 description = td_elements[1].text
+    #                 parts.append([partNo, description, type])
+
+    #     print(parts)
+    #     return parts
+
+    print("Searching part in IGC: " + partNo)   
+    url = 'https://importglasscorp.com/glass/' + partNo
     try:
-        print("Searching part in PWG: " + partNo)
+        # Navigate to the URL
         driver.get(url)
-        # Wait for the element to be present
-        wait = WebDriverWait(driver, 10)  
-
-        type_select = wait.until(EC.presence_of_element_located((By.ID, "PartTypeA")))
-        type_select.click()
-        part_no_input = wait.until(EC.presence_of_element_located((By.ID, "PartNo")))
-
-        # Send keys to the input field
-        part_no_input.send_keys(partNo + Keys.RETURN)
-
-        quote = wait.until(EC.presence_of_element_located((By.XPATH, "//button[@id='btnQuote']")))
-        if (quote.text == "Quotes"):
-            quote.click()
-            pin = wait.until(EC.presence_of_element_located((By.ID, "PinNumber")))
-            pin.send_keys("1313" + Keys.RETURN)
-
         parts = []
-        location = wait.until(EC.presence_of_element_located((By.XPATH, "//span[@class='b2btext']"))).text.split(":: ")[1].strip()
-        
-        products = wait.until(EC.presence_of_all_elements_located((By.TAG_NAME, "table")))[2].find_elements(By.TAG_NAME, "tr")[2:]
-        wait.until(EC.presence_of_element_located((By.XPATH, "//button[@class='button check']"))).click()
-        for product in products:
-            part = []
-            try:
-                partName = product.find_elements(By.TAG_NAME, 'font')[1].text
-                if (partNo in partName):
-                    part.append(partName)
-                    description = product.find_element(By.XPATH, "//div[@class='options']").text.replace('»', '').strip()
-                    part.append(description)
-                    try:
-                        availability = product.find_element(By.XPATH, "//td[@ref-qty]").text
-                        part.append(availability)
-                    except NoSuchElementException:
-                        part.append("Not available")
-                    part.append(product.find_elements(By.TAG_NAME, 'font')[2].text)
-                    part.append(location)
-                    parts.append(part)
-                else:
-                    break
-            except:
-                continue
-        
-        ## Perfect above this line
+        # Wait for the tables to be present
+        wait = WebDriverWait(driver, 10)  # wait up to 10 seconds
+        table = wait.until(EC.presence_of_element_located((By.TAG_NAME, "table")))
+        location = table.find_element(By.XPATH, "./preceding-sibling::*[1]").find_element(By.TAG_NAME, 'b').text
+        if location != "Opa-Locka":
+            logger.info("Part not available in Opa-Locka")
+            return None
 
-        wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(text(), 'Check Other Locations')]"))).click()
-
+        tbody = table.find_element(By.TAG_NAME, "tbody")
         try:
-            matching_table = driver.find_element(By.XPATH, "//table[.//td//span[contains(text(), 'Branch:: MIAMI FL')]]")
+            trs = tbody.find_elements(By.TAG_NAME, "tr")
         except:
-            return parts
+            return None
 
-        products = matching_table.find_elements(By.TAG_NAME, "tr")[2:]
-        for product in products:
-            part = []
-            try:
-                data = product.find_elements(By.TAG_NAME, 'font')
-                partName = data[2].text
-                if (partNo in partName):
-                    part.append(partName)
-                    description = product.find_element(By.XPATH, "//div[@class='options']").text.replace('»', '').strip()
-                    part.append(description)
-                    try:
-                        availability = data[1].text
-                        part.append(availability)
-                    except NoSuchElementException:
-                        part.append("Not available")
-                    part.append(data[3].text)
-                    part.append("Miami FL")
-                    parts.append(part)
-            except:
+        for tr in trs:
+            td_elements = tr.find_elements(By.TAG_NAME, 'td')
+            first_value = td_elements[0].find_element(By.TAG_NAME, 'a').text  # 1st value
+            if (partNo not in first_value):
                 continue
-        print(parts)
-    except TimeoutException:
+            fourth_value = td_elements[3].find_element(By.TAG_NAME, 'b').text  # 4th value
+            if td_elements[4].text == "In Stock":
+                fifth_value = "Yes"
+            else:
+                fifth_value = "No"  
+            parts.append([first_value, fourth_value, fifth_value, location])
+        return parts
+    except:
+        logger.error("Part number not found: " + partNo + " on IGC")
         return None
 
 def setup_chrome_driver():
@@ -98,14 +101,5 @@ def setup_chrome_driver():
     except Exception as e:
         raise
 
-def PWGScraper(partNo, driver):
-
-    try:
-        result = searchPart(driver, partNo)
-        driver.quit()
-        return result
-    except:
-        return None
-
 if __name__ == "__main__":
-    PWGScraper("DW01256", setup_chrome_driver())
+    IGCScraper({'make': "Honda", "model": "Civic", "year": '2001'}, setup_chrome_driver(), 'Vehicle Type')
