@@ -21,7 +21,7 @@ def MyGrantScraper(partNo, driver, logger):
                     part = [data[1].find('a').text.replace('\n', '').strip(), data[2].text.replace('\n', '').strip(), data[0].find('span').text.replace('\n', '').strip(), locations[0].text.split(' - ')[0].strip()]
                     parts.append(part)
                 locations.pop(0)
-            return parts
+            return parts     #[Part Number, Price, Availability, Location]
         except:
             print("not found")
             return None

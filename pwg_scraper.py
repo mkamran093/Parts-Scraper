@@ -82,7 +82,7 @@ def searchPart(driver, partNo, logger):
                     parts.append(part)
             except:
                 continue
-        return parts
+        return parts   # [partnumber, description, availability, price, location]
 
     except TimeoutException:
         logger.error("No results found for the part number: " + partNo + " on PWG.")

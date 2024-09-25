@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: #fff;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        #loader {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message {
+            background-color: #e74c3c;
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Products</h1>
+        <h3>Searching for Part Number: {{ data }}</h3>
+        
+        <div id="loader">
+            <div class="spinner"></div>
+        </div>
+        <div id="tables-container"></div>
+    </div>
+
+    <script>
+        const partNumber = '{{ data }}';
+        const loader = document.getElementById('loader');
+        const tablesContainer = document.getElementById('tables-container');
+
+        loader.style.display = 'block';
+
+        fetch(`http://127.0.0.1:5001/products/${partNumber}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            loader.style.display = 'none';
+            console.log('Received data:', data);
+
+            data = JSON.parse(data);
+
+            const categories = ['IGC', 'PWG', 'Pilkington', 'MyGrant'];
+            let dataFound = false;
+
+            categories.forEach(category => {
+                if (data[category] && Array.isArray(data[category]) && data[category].length > 0) {
+                    createTable(data[category], `${category} Data`);
+                    dataFound = true;
+                } else {
+                    const message = document.createElement('div');
+                    message.className = 'message';
+                    message.textContent = `No data available for the specified part number on ${category} site.`;
+                    tablesContainer.appendChild(message);
+                }
+            });
+
+            if (!dataFound) {
+                const noDataMessage = document.createElement('h2');
+                noDataMessage.textContent = 'No data available for the specified part number on any site.';
+                tablesContainer.appendChild(noDataMessage);
+            }
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+            loader.style.display = 'none';
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'message';
+            errorMessage.textContent = 'Failed to load data. Please try again.';
+            tablesContainer.appendChild(errorMessage);
+        });
+
+        function createTable(data, title) {
+            const tableWrapper = document.createElement('div');
+            const titleElement = document.createElement('h2');
+            titleElement.textContent = title;
+            tableWrapper.appendChild(titleElement);
+
+            const table = document.createElement('table');
+            const thead = table.createTHead();
+            const tbody = table.createTBody();
+            const headerRow = thead.insertRow();
+
+            Object.keys(data[0]).forEach(key => {
+                const th = document.createElement('th');
+                th.textContent = key;
+                headerRow.appendChild(th);
+            });
+
+            data.forEach(item => {
+                const row = tbody.insertRow();
+                Object.values(item).forEach(value => {
+                    const cell = row.insertCell();
+                    cell.textContent = value;
+                });
+            });
+
+            tableWrapper.appendChild(table);
+            tablesContainer.appendChild(tableWrapper);
+        }
+    </script>
+</body>
+</html>

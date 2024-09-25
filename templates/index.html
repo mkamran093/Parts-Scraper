@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parts Search</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        .search-method {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #34495e;
+            font-weight: bold;
+        }
+        select, input, button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 12px;
+        }
+        button {
+            background-color: #3498db;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .input-container {
+            display: none;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Parts Search</h1>
+        <div class="search-method">
+            <label for="search-method">Select the method of searching:</label>
+            <select id="search-method">
+                <option value="">--Select--</option>
+                <option value="part-number">By Part Number</option>
+                <option value="vin-number">By VIN Number</option>
+                <option value="vehicle-type">By Vehicle Type</option>
+            </select>
+        </div>
+        <div id="input-container" class="input-container">
+            <label id="input-label" for="search-input"></label>
+            <input type="text" id="search-input">
+            <button id="search-button">Search</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('search-method').addEventListener('change', function() {
+            const selectedMethod = this.value;
+            const inputContainer = document.getElementById('input-container');
+            const inputLabel = document.getElementById('input-label');
+            const searchInput = document.getElementById('search-input');
+
+            if (selectedMethod === 'vehicle-type') {
+                window.location.href = 'http://127.0.0.1:5001/vehicle-lookup';
+            } else if (selectedMethod === 'part-number') {
+                inputContainer.style.display = 'block';
+                inputLabel.textContent = 'Enter Part Number:';
+                searchInput.placeholder = 'Part Number';
+            } else if (selectedMethod === 'vin-number') {
+                inputContainer.style.display = 'block';
+                inputLabel.textContent = 'Enter VIN Number:';
+                searchInput.placeholder = 'VIN Number';
+            } else {
+                inputContainer.style.display = 'none';
+            }
+        });
+
+        document.getElementById('search-button').addEventListener('click', function() {
+            const selectedMethod = document.getElementById('search-method').value;
+            const searchInput = document.getElementById('search-input').value;
+
+            if (selectedMethod === 'part-number' && searchInput) {
+                window.location.href = `http://127.0.0.1:5001/part-search/${searchInput}`;
+            }
+        });
+    </script>
+</body>
+</html>
