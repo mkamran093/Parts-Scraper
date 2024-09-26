@@ -1,15 +1,40 @@
+import os
+from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
+def login(driver):
+    print("Logging in to Buy PGW Auto Glass")
+    load_dotenv()
+    username = os.getenv('PWG_USER')
+    password = os.getenv('PWG_PASS')
+    try:
+        wait = WebDriverWait(driver, 10)
+        driver.get('https://buypgwautoglass.com/')
+        user_input = wait.until(EC.presence_of_element_located((By.ID, 'txtUsername')))
+        pass_input = wait.until(EC.presence_of_element_located((By.ID, 'txtPassword')))
+        user_input.clear()
+        pass_input.clear()
+        user_input.send_keys(username)
+        pass_input.send_keys(password)
+        wait.until(EC.presence_of_element_located((By.ID, 'button1'))).click()
+        wait.until(EC.presence_of_element_located((By.XPATH, "//input[@value='I Agree']"))).click()
+    except Exception as e:
+        print(f"Error: {e}")
+        raise
+    
 def searchPart(driver, partNo, logger):
 
     url = 'https://buypgwautoglass.com/PartSearch/search.asp?REG=&UserType=F&ShipToNo=85605&PB=544'
     try:
         print("Searching part in PWG: " + partNo)
         driver.get(url)
+        if (driver.current_url != url):
+            login(driver)
+            driver.get(url)
         # Wait for the element to be present
         wait = WebDriverWait(driver, 10)  
 
@@ -96,5 +121,3 @@ def PWGScraper(partNo, driver, logger):
     except:
         return None
 
-if __name__ == "__main__":
-    PWGScraper("DW01256")
