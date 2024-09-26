@@ -83,6 +83,25 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
+        .add-to-cart {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .add-to-cart:hover {
+            background-color: #2ecc71;
+        }
+
+        .add-to-cart:active {
+            background-color: #229954;
+        }
     </style>
 </head>
 <body>
@@ -147,51 +166,51 @@
         });
 
         function createTable(data, title) {
-        const tableWrapper = document.createElement('div');
-        const titleElement = document.createElement('h2');
-        titleElement.textContent = title;
-        tableWrapper.appendChild(titleElement);
+            const tableWrapper = document.createElement('div');
+            const titleElement = document.createElement('h2');
+            titleElement.textContent = title;
+            tableWrapper.appendChild(titleElement);
 
-        const table = document.createElement('table');
-        const thead = table.createTHead();
-        const tbody = table.createTBody();
-        const headerRow = thead.insertRow();
+            const table = document.createElement('table');
+            const thead = table.createTHead();
+            const tbody = table.createTBody();
+            const headerRow = thead.insertRow();
 
-        // Create table headers
-        Object.keys(data[0]).forEach(key => {
-            const th = document.createElement('th');
-            th.textContent = key;
-            headerRow.appendChild(th);
-        });
-
-        // Add "Add to Cart" header
-        const th = document.createElement('th');
-        th.textContent = 'Add to Cart';
-        headerRow.appendChild(th);
-
-        // Populate table with data
-        data.forEach(item => {
-            const row = tbody.insertRow();
-            Object.values(item).forEach(value => {
-                const cell = row.insertCell();
-                cell.textContent = value;
+            // Create table headers
+            Object.keys(data[0]).forEach(key => {
+                const th = document.createElement('th');
+                th.textContent = key;
+                headerRow.appendChild(th);
             });
 
-            // Create the "Add to Cart" button
-            const buttonCell = row.insertCell();
-            const button = document.createElement('button');
-            button.textContent = 'Add to Cart';
-            button.onclick = () => {
-                // Handle the add to cart action here
-                console.log(`Added ${item.name} to cart`); // Example action, modify as needed
-            };
-            buttonCell.appendChild(button);
-        });
+            // Add "Add to Cart" header
+            const th = document.createElement('th');
+            th.textContent = 'Add to Cart';
+            headerRow.appendChild(th);
 
-        tableWrapper.appendChild(table);
-        tablesContainer.appendChild(tableWrapper);
-    }
+            // Populate table with data
+            data.forEach(item => {
+                const row = tbody.insertRow();
+                Object.values(item).forEach(value => {
+                    const cell = row.insertCell();
+                    cell.textContent = value;
+                });
 
+                // Create the "Add to Cart" button
+                const buttonCell = row.insertCell();
+                const button = document.createElement('button');
+                button.textContent = 'Add to Cart';
+                button.className = 'add-to-cart';
+                button.onclick = () => {
+                    // Handle the add to cart action here
+                    console.log(`Added ${item.name} to cart`); // Example action, modify as needed
+                };
+                buttonCell.appendChild(button);
+            });
+
+            tableWrapper.appendChild(table);
+            tablesContainer.appendChild(tableWrapper);
+        }
     </script>
 </body>
 </html>
