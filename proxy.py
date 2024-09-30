@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, Response, send_from_directory
+from flask import Flask, jsonify, render_template, request, Response
 from partScraper import runScraper
 from flask_cors import CORS
 import requests
